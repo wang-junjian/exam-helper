@@ -2,6 +2,8 @@
 
 一个单文件 HTML 应用，用于本地加载 Excel/CSV 题库并快速检索、查看答案。
 
+**智能体协作**：`Kimi - K2.7 Coding Highspeed`
+
 ## 特性
 
 - **单文件离线使用**：最终产物只有一个 `exam-helper.html`，无需服务器、无需联网。
