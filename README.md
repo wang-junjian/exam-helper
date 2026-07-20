@@ -35,7 +35,7 @@ npm run build
 
 下面视频演示了如何选择题库目录、搜索题目、查看答案高亮与分页：
 
-<video src="https://raw.githubusercontent.com/wang-junjian/exam-helper/main/exam-helper.mp4" controls width="720"></video>
+![](https://raw.githubusercontent.com/wang-junjian/exam-helper/main/exam-helper.mp4)
 
 视频中的题目来自公开科普样例 `templates/question-bank-template.xlsx`。
 
