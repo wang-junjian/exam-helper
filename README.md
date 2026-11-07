@@ -2,6 +2,8 @@
 
 一个单文件 HTML 应用，用于本地加载 Excel/CSV 题库并快速检索、查看答案。
 
+**在线试用**：<https://wangjunjian.com/exam-helper/>
+
 **智能体协作**：`Kimi - K2.7 Coding Highspeed`
 
 ## 特性
@@ -37,7 +39,7 @@ npm run build
 
 下面视频演示了如何选择题库目录、搜索题目、查看答案高亮与分页：
 
-<video src="https://raw.githubusercontent.com/wang-junjian/exam-helper/main/exam-helper.mp4" controls width="720"></video>
+<video src="https://wangjunjian.com/exam-helper/exam-helper.mp4" controls width="720"></video>
 
 视频中的题目来自公开科普样例 `templates/question-bank-template.xlsx`。
 
@@ -68,7 +70,23 @@ npm run build
 
 - `src/exam-helper-template.html`：应用源码模板。
 - `scripts/build.js`：将 SheetJS、拼音库内联到 HTML 中，生成最终 `exam-helper.html`。
+- `scripts/smoke.js`：产物静态自检（零依赖），确认单文件里两个库已内联、关键 DOM 齐全、无外部网络依赖。
 - `scripts/generate-template.js`：生成示例题库模板。
+
+```bash
+npm run build   # 生成 exam-helper.html
+npm test        # 校验构建产物可用
+```
+
+## 在线部署
+
+`main` 分支的每次 push 都会触发 [`.github/workflows/pages.yml`](./.github/workflows/pages.yml)，由 GitHub Actions 完成：
+
+1. `npm ci` → `npm test` → `npm run build`；
+2. 二次构建比对哈希 + `git diff --exit-code`，防止「改了源码忘重建产物」或构建非确定性；
+3. 把 `exam-helper.html` 发布为 Pages 的 `index.html`（同时保留 `exam-helper.html`、`exam-helper.mp4`），附 `.nojekyll`。
+
+线上地址在 `main` 分支构建部署后自动更新：<https://wangjunjian.com/exam-helper/>
 
 ## 开发文档
 

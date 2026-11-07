@@ -1,0 +1,74 @@
+name: Deploy exam-helper
+
+# 仓库里同时提交了源码（src/、scripts/）与构建产物（exam-helper.html）。
+# 本工作流在每次 push 到 main 时重新构建一遍，确认产物与源码一致，
+# 然后把单文件产物发布成 Pages 的 index.html —— 也就是线上「点开即用」的版本。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时刻只允许一个部署在跑，且不取消进行中的部署（避免站点短暂空档）。
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # playwright 只是本地调试脚本用的，CI 不需要它的浏览器二进制。
+      - name: Install
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+        run: npm ci
+
+      - run: npm test
+      - run: npm run build
+
+      # 防「源码改了产物没重建」+ 防非确定性构建。
+      # 产物已入库，所以这里既比对两次构建的哈希，也要求 build 不改动任何被跟踪文件：
+      # 只要有 diff，说明提交的 exam-helper.html 与 src/ 不同步，直接失败。
+      - name: Build reproducibility & tracked-files guard
+        run: |
+          sha256sum exam-helper.html > /tmp/h1
+          npm run build
+          sha256sum exam-helper.html > /tmp/h2
+          diff -u /tmp/h1 /tmp/h2
+          npm test
+          git diff --exit-code
+
+      - name: Assemble single-file site
+        run: |
+          mkdir -p site
+          cp exam-helper.html site/index.html
+          cp exam-helper.html site/exam-helper.html
+          cp exam-helper.mp4 site/exam-helper.mp4
+          touch site/.nojekyll
+          printf 'Build of commit %s\n' "$GITHUB_SHA" > site/build.txt
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
