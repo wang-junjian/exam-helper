@@ -1,3 +1,6 @@
 node_modules/
 .DS_Store
 repository/
+
+# WorkBuddy 本地工作区数据（工作日志等），只留本机，不进仓库。
+.workbuddy/
